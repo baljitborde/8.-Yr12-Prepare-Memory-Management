@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Management – Year 12 Pre-learning | Pearson Edexcel IAS</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+body{margin:0;padding:0;background:#f5f5f5;font-family:'Lato',sans-serif;font-size:14pt;color:#333333;line-height:1.65;}
+
+.opt{display:block;font-family:'Lato',sans-serif;font-size:14pt;padding:11px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#ffffff;color:#333333;cursor:pointer;margin-bottom:10px;line-height:1.4;user-select:none;-webkit-user-select:none;transition:background 0.12s,border-color 0.12s;}
+.opt:hover{background:#e3f2fd;border-color:#007BA6;}
+.opt.selected{background:#e3f2fd;border-color:#007BA6;font-weight:700;}
+.opt.correct{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;font-weight:700;pointer-events:none;cursor:default;}
+.opt.wrong{background:#ffebee!important;border-color:#C62828!important;color:#7f0000!important;pointer-events:none;cursor:default;}
+.opt.reveal{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;font-weight:700;pointer-events:none;cursor:default;}
+.opt.locked{pointer-events:none;cursor:default;}
+
+.wopt{display:inline-block;font-family:'Courier New',Courier,monospace;font-size:13pt;font-weight:700;padding:8px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#ffffff;color:#333333;cursor:pointer;margin:4px 6px 4px 0;line-height:1.4;user-select:none;-webkit-user-select:none;transition:background 0.12s,border-color 0.12s;}
+.wopt:hover{background:#e3f2fd;border-color:#007BA6;}
+.wopt.correct{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;pointer-events:none;}
+.wopt.wrong{background:#ffebee!important;border-color:#C62828!important;color:#7f0000!important;pointer-events:none;}
+.wopt.reveal{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;pointer-events:none;}
+.wopt.locked{pointer-events:none;}
+
+.fb{display:none;font-family:'Lato',sans-serif;font-size:14pt;line-height:1.65;padding:14px 18px;border-radius:6px;margin-top:14px;}
+.fb-ok{background:#e8f5e9;color:#1b5e20;border:1px solid #81c784;}
+.fb-bad{background:#ffebee;color:#7f0000;border:1px solid #ef9a9a;}
+
+.tf-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:10px;padding:12px 16px;background:#fff;border:1px solid #d0d0d0;border-radius:6px;flex-wrap:wrap;}
+.tf-stmt{flex:1;font-family:'Lato',sans-serif;font-size:14pt;color:#333;line-height:1.5;}
+.tf-btns{display:flex;gap:8px;flex-shrink:0;margin-top:2px;}
+.tf-btn{font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:7px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#fff;color:#333;cursor:pointer;}
+.tf-btn:hover{background:#e3f2fd;border-color:#007BA6;}
+.tf-btn.ok{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;pointer-events:none;}
+.tf-btn.bad{background:#ffebee;border-color:#C62828;color:#7f0000;pointer-events:none;}
+.tf-btn.show{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;pointer-events:none;}
+.tf-row.done .tf-btn{pointer-events:none;}
+.tf-row > div:not(.tf-stmt):not(.tf-btns){flex-basis:100%;}
+
+.match-row{display:grid;grid-template-columns:200px 1fr;gap:8px;margin-bottom:8px;align-items:center;}
+.match-term{font-family:'Courier New',monospace;font-size:13pt;font-weight:700;padding:9px 12px;background:#1e1e2e;border-radius:6px;color:#a6e3a1;text-align:center;line-height:1.4;}
+.match-sel{font-family:'Lato',sans-serif;font-size:13pt;padding:9px 12px;border:2px solid #d0d0d0;border-radius:6px;background:#fff;color:#333;width:100%;cursor:pointer;}
+.match-sel:focus{outline:none;border-color:#007BA6;}
+.match-row.ok .match-sel{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;}
+.match-row.bad .match-sel{background:#ffebee;border-color:#C62828;color:#7f0000;}
+.match-btn,.check-btn{display:inline-block;font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:8px 22px;border:2px solid #007BA6;border-radius:6px;background:#007BA6;color:#fff;cursor:pointer;margin-top:12px;}
+.match-btn:hover,.check-btn:hover{background:#005f80;}
+.match-btn:disabled,.check-btn:disabled{background:#b3d4e8;border-color:#b3d4e8;cursor:default;}
+.match-result,.drag-result{display:none;font-family:'Lato',sans-serif;font-size:14pt;line-height:1.65;padding:14px 18px;border-radius:6px;margin-top:12px;}
+
+.drag-bank{display:flex;flex-wrap:wrap;gap:8px;padding:14px;background:#f0f8ff;border:2px dashed #b3d4e8;border-radius:6px;min-height:52px;margin-bottom:12px;}
+.drag-chip{font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:7px 16px;border:2px solid #007BA6;border-radius:6px;background:#e3f2fd;color:#007BA6;cursor:grab;white-space:nowrap;user-select:none;-webkit-user-select:none;line-height:1.3;}
+.drag-chip:active{cursor:grabbing;opacity:0.7;}
+.drag-chip.picked{outline:3px solid #e65100;outline-offset:1px;}
+.drag-chip.locked{cursor:default;pointer-events:none;opacity:0.75;}
+.drop-zone{display:inline-flex;align-items:center;justify-content:center;min-width:130px;padding:4px 8px;border-bottom:3px solid #007BA6;background:#fafafa;font-family:'Lato',sans-serif;font-size:12pt;color:#C62828;font-weight:700;vertical-align:middle;text-align:center;min-height:36px;cursor:pointer;}
+.drop-zone:empty::before{content:'?';}
+.drop-zone.drag-over,.drag-bank.drag-over{background:#e3f2fd;border-bottom-color:#C62828;}
+.drop-zone .drag-chip{white-space:normal;}
+.sort-zone{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:6px;min-height:76px;}
+.sort-zone .drag-chip,.long-chips .drag-chip{white-space:normal;}
+.tap-tip{font-size:11pt;color:#666;margin-bottom:10px;font-style:italic;}
+
+code{font-family:'Courier New',monospace;background:#f0f0f0;padding:1px 6px;border-radius:3px;font-size:13pt;}
+.cx-tbl{border-collapse:collapse;width:100%;font-size:13pt;}
+.cx-tbl th{background:#007BA6;color:#fff;padding:9px 14px;border:1px solid #005f80;text-align:center;}
+.cx-tbl td{border:1px solid #d0d0d0;padding:8px 14px;text-align:left;vertical-align:top;}
+.cx-tbl tr:nth-child(even) td{background:#f0f8ff;}
+.code{margin:0;background:#1e1e2e;border-radius:8px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12pt;line-height:1.85;color:#cdd6f4;white-space:pre;overflow-x:auto;}
+.code-lbl{font-size:11pt;font-weight:700;color:#6c7086;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;font-family:'Lato',sans-serif;white-space:normal;}
+.k{color:#f38ba8;}.v{color:#fab387;}.f{color:#a6e3a1;}.cm{color:#6c7086;}.s{color:#f9e2af;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g2>*,.g3>*{min-width:0;}
+
+/* memory diagrams */
+.mem-col{display:flex;flex-direction:column;gap:4px;}
+.mem-hd{font-size:12pt;font-weight:700;color:#007BA6;text-align:center;margin-bottom:4px;}
+.mem-cell{display:flex;align-items:center;gap:8px;font-size:12pt;}
+.mem-n{font-family:'Courier New',monospace;font-size:11pt;color:#555;min-width:62px;text-align:right;}
+.mem-b{flex:1;min-height:40px;border:2px solid #333;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12pt;padding:2px 6px;text-align:center;}
+.mem-b .drop-zone{min-width:0;width:100%;}
+.bA{background:#e3f2fd;color:#007BA6;border-color:#007BA6;}
+.bB{background:#eeeeee;color:#666;border-color:#999;}
+.bF{background:#fff;color:#999;border-style:dashed;}
+.bC{background:#e8f5e9;color:#388e3c;border-color:#388e3c;}
+.bD{background:#f3e5f5;color:#9966FF;border-color:#9966FF;}
+.bE{background:#fff3e0;color:#e65100;border-color:#e65100;}
+.map{display:flex;border:2px solid #333;border-radius:4px;overflow:hidden;}
+.map div{flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:11pt;font-weight:700;border-right:1px solid #fff;color:#fff;}
+.map div:last-child{border-right:none;}
+
+/* stack */
+.stack{border:2px solid #333;border-radius:6px;overflow:hidden;background:#fff;}
+.frame{border-bottom:2px solid #fff;padding:8px 12px;color:#fff;}
+.frame:last-child{border-bottom:none;}
+.frame-h{font-weight:700;font-family:'Courier New',monospace;font-size:13pt;}
+.frame-b{font-size:11.5pt;line-height:1.5;opacity:0.95;}
+.sframe{border:2px solid #007BA6;border-radius:6px;background:#f0f8ff;padding:8px 10px;margin-bottom:6px;}
+.sframe .drop-zone{min-width:0;width:100%;}
+.sframe-lbl{font-size:11pt;color:#555;margin:4px 0 2px;}
+
+@media (max-width:720px){
+  .g2,.g3{grid-template-columns:1fr;}
+  .match-row{grid-template-columns:1fr;}
+  .tf-row{flex-direction:column;}
+}
+</style>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;">
+<div style="max-width:960px;margin:0 auto;padding:0 0 80px;">
+
+<!-- HEADER -->
+<div style="background:#007BA6;padding:32px 40px 28px;">
+  <div style="font-size:11pt;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Pearson Edexcel International AS Computer Science &bull; Unit 1 &bull; Topic 1.2.4</div>
+  <div style="font-size:24pt;font-weight:700;color:#ffffff;margin:0 0 6px;">Operating Systems: Memory Management</div>
+  <div style="font-size:14pt;color:rgba(255,255,255,0.88);">Pre-learning &nbsp;|&nbsp; Year 12 Computer Science</div>
+  <div style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap;">
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 90 minutes</span>
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 6 sections</span>
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 22 interactive activities</span>
+  </div>
+</div>
+
+<!-- CONTENTS -->
+<div style="background:#ffffff;border-bottom:1px solid #d0d0d0;padding:20px 40px;">
+  <div style="font-size:12pt;font-weight:700;color:#007BA6;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">Contents</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>Memory Management Operations</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>Paging</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>Segmentation</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>Virtual Memory</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>Stack Frames</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">6</div>Comparing &amp; Review</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&#10003;</div>Summary</div>
+  </div>
+</div>
+
+<div style="padding:40px 40px 0;">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 1 — OPERATIONS
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Memory Management Operations</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~15 minutes</div>
+  </div>
+
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <p style="margin:0 0 14px;"><strong>Memory management</strong> is the part of the operating system that controls how <strong>main memory (RAM)</strong> is shared between the OS and all the running processes. Every process needs space in RAM for its instructions and data before the CPU can execute it, and RAM is limited, so the OS has to decide who gets which part of memory, and when.</p>
+    <p style="margin:0 0 14px;"><strong>Why is it needed?</strong> Many processes are in memory at once. Without memory management, processes could overwrite each other's data, memory would be wasted, and there would be no way to load a new program when RAM looked full.</p>
+
+    <div class="g3" style="margin-bottom:16px;">
+      <div style="background:#e3f2fd;border-radius:8px;padding:16px 18px;border-top:4px solid #007BA6;">
+        <div style="font-weight:700;color:#007BA6;font-size:14pt;margin-bottom:8px;">&#128203; Tracking allocation status</div>
+        <p style="margin:0;font-size:12.5pt;">The OS keeps a record (a <strong>memory map</strong> or allocation table) of every block of memory: whether it is <strong>free</strong> or <strong>allocated</strong>, and which process owns it.</p>
+      </div>
+      <div style="background:#e8f5e9;border-radius:8px;padding:16px 18px;border-top:4px solid #388e3c;">
+        <div style="font-weight:700;color:#388e3c;font-size:14pt;margin-bottom:8px;">&#128207; Determining storage requirements</div>
+        <p style="margin:0;font-size:12.5pt;">Before and while a process runs, the OS works out <strong>how much memory it needs</strong> — space for its code, its data, its stack and any extra memory it requests while running.</p>
+      </div>
+      <div style="background:#f3e5f5;border-radius:8px;padding:16px 18px;border-top:4px solid #9966FF;">
+        <div style="font-weight:700;color:#9966FF;font-size:14pt;margin-bottom:8px;">&#128737;&#65039; Controlling memory usage</div>
+        <p style="margin:0;font-size:12.5pt;">The OS <strong>allocates</strong> memory to processes, <strong>deallocates</strong> (frees) it when they finish, <strong>protects</strong> each process's memory from the others and moves data out of RAM when it is full.</p>
+      </div>
+    </div>
+
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:6px;">A simple memory map</div>
+    <div class="map" style="margin-bottom:4px;">
+      <div style="background:#333;">OS</div><div style="background:#333;">OS</div>
+      <div style="background:#007BA6;">P1</div><div style="background:#007BA6;">P1</div><div style="background:#007BA6;">P1</div>
+      <div style="background:#fff;color:#999;">free</div>
+      <div style="background:#388e3c;">P2</div><div style="background:#388e3c;">P2</div>
+      <div style="background:#fff;color:#999;">free</div><div style="background:#fff;color:#999;">free</div>
+      <div style="background:#9966FF;">P3</div>
+      <div style="background:#fff;color:#999;">free</div>
+    </div>
+    <p style="margin:6px 0 16px;font-size:12.5pt;color:#555;">The OS updates this record every time memory is allocated or freed. When P2 ends, its two blocks are marked free and can be given to a new process.</p>
+
+    <div style="border-left:4px solid #9966FF;background:#f3e5f5;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;">
+      <strong style="color:#9966FF;">Memory protection:</strong> each process may only access the memory allocated to it. If a process tries to read or write outside its own area, the OS stops it. This keeps a faulty program from crashing others or reading their data.
+    </div>
+    <div style="border-left:4px solid #007BA6;background:#e3f2fd;padding:12px 16px;border-radius:0 6px 6px 0;">
+      <strong style="color:#007BA6;">Specification 1.2.4:</strong> You need to know the operations of memory management (tracking memory allocation status, determining storage requirements, controlling memory usage), the allocation techniques of paging, segmentation and virtual memory, and the stack frame — their definition, function, characteristics, why they are needed, how they operate, and their benefits and drawbacks.
+    </div>
+  </div>
+
+  <!-- Activity 1 — match -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9654; Activity 1 — Match the term to its definition</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;">Use the dropdowns to match each term to its definition.</div>
+    <div id="match1">
+      <div class="match-row"><div class="match-term">Main memory</div><select class="match-sel" data-ans="ram"></select></div>
+      <div class="match-row"><div class="match-term">Memory map</div><select class="match-sel" data-ans="map"></select></div>
+      <div class="match-row"><div class="match-term">Allocation</div><select class="match-sel" data-ans="alloc"></select></div>
+      <div class="match-row"><div class="match-term">Deallocation</div><select class="match-sel" data-ans="dealloc"></select></div>
+      <div class="match-row"><div class="match-term">Protection</div><select class="match-sel" data-ans="prot"></select></div>
+    </div>
+    <button class="match-btn" id="match1-btn" onclick="checkMatch1()">&#10003; Check my answers</button>
+    <div class="match-result" id="match1-res"></div>
+  </div>
+
+  <!-- Activity 2 — 3-column sort -->
+  <div class="act" data-n="2" style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#8644; Activity 2 — Sort the jobs into the three operations</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:6px;line-height:1.5;">Drag each job the OS does into the memory management operation it belongs to.</div>
+    <div class="tap-tip">Tip: you can also tap a chip and then tap a column to place it.</div>
+    <div class="drag-bank long-chips" id="bank2">
+      <div class="drag-chip" draggable="true">Stops one process using another's memory</div>
+      <div class="drag-chip" draggable="true">Records which blocks are free and which are in use</div>
+      <div class="drag-chip" draggable="true">Works out how much memory a new process needs</div>
+      <div class="drag-chip" draggable="true">Frees a process's memory when it ends</div>
+      <div class="drag-chip" draggable="true">Notes which process owns each block</div>
+      <div class="drag-chip" draggable="true">Calculates space for code, data and stack</div>
+    </div>
+    <div class="g3" style="margin-bottom:12px;">
+      <div>
+        <div style="font-size:12pt;font-weight:700;color:#007BA6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Tracking status</div>
+        <div id="sort2-trk" class="sort-zone drag-bank" style="border-color:#007BA6;background:#f0f8ff;min-height:130px;"></div>
+      </div>
+      <div>
+        <div style="font-size:12pt;font-weight:700;color:#388e3c;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Determining requirements</div>
+        <div id="sort2-req" class="sort-zone drag-bank" style="border-color:#388e3c;background:#f0f8f0;min-height:130px;"></div>
+      </div>
+      <div>
+        <div style="font-size:12pt;font-weight:700;color:#9966FF;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Controlling usage</div>
+        <div id="sort2-ctl" class="sort-zone drag-bank" style="border-color:#9966FF;background:#f8f0ff;min-height:130px;"></div>
+      </div>
+    </div>
+    <button class="check-btn" id="btn2" onclick="checkSort2()">&#10003; Check my sort</button>
+    <div class="drag-result" id="res2"></div>
+  </div>
+
+  <!-- Activity 3 — MCQ correct=c -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 3 — Multiple choice — read the memory map</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;line-height:1.5;">Look at the memory map above. Process P2 finishes. What does the OS do with the memory map?</div>
+    <div id="opts3">
+      <div class="opt" onclick="pickOpt(3,'a',this)">a) Nothing — the blocks stay allocated to P2 until the computer restarts</div>
+      <div class="opt" onclick="pickOpt(3,'b',this)">b) It gives P2's blocks to P1 automatically</div>
+      <div class="opt" onclick="pickOpt(3,'c',this)">c) It marks P2's two blocks as free so they can be allocated to another process</div>
+      <div class="opt" onclick="pickOpt(3,'d',this)">d) It moves P2's blocks into the OS area</div>
+    </div>
+    <div class="fb" id="fb3"></div>
+  </div>
+
+  <!-- Activity 4 — TF -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 4 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;">Click True or False for each statement about memory management.</div>
+    <div class="tf-row" id="tf1">
+      <div class="tf-stmt">A process must be in main memory (RAM) before the CPU can execute its instructions.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(1,true,true)">True</button><button class="tf-btn" onclick="doTF(1,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf2">
+      <div class="tf-stmt">Any process is allowed to read and change the memory of any other process.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(2,true,false)">True</button><button class="tf-btn" onclick="doTF(2,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf3">
+      <div class="tf-stmt">A process may ask for extra memory while it is running, not just when it is first loaded.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(3,true,true)">True</button><button class="tf-btn" onclick="doTF(3,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf4">
+      <div class="tf-stmt">Once memory has been allocated to a process, it can never be reused by another process.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(4,true,false)">True</button><button class="tf-btn" onclick="doTF(4,false,false)">False</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 2 — PAGING
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Paging</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~15 minutes</div>
+  </div>
+
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <p style="margin:0 0 14px;"><strong>Paging</strong> splits memory into <strong>equal, fixed-size blocks</strong>. A process is divided into <strong>pages</strong>, and physical memory (RAM) is divided into <strong>frames</strong> of exactly the same size (for example 4 KB). Any page can be loaded into any free frame, so a process's pages <strong>do not need to be next to each other</strong> in RAM.</p>
+    <p style="margin:0 0 14px;">The OS keeps a <strong>page table</strong> for each process. It records which frame each page has been placed in, so the CPU's memory requests can be translated to the right physical location.</p>
+
+    <div style="overflow-x:auto;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:20px;min-width:600px;align-items:start;">
+        <div class="mem-col">
+          <div class="mem-hd">Process A (logical)</div>
+          <div class="mem-cell"><div class="mem-b bA">Page 0</div></div>
+          <div class="mem-cell"><div class="mem-b bA">Page 1</div></div>
+          <div class="mem-cell"><div class="mem-b bA">Page 2</div></div>
+          <div class="mem-cell"><div class="mem-b bA">Page 3</div></div>
+        </div>
+        <div>
+          <div class="mem-hd">Page table</div>
+          <table class="cx-tbl" style="font-size:12pt;">
+            <tr><th>Page</th><th>Frame</th></tr>
+            <tr><td>0</td><td>2</td></tr>
+            <tr><td>1</td><td>5</td></tr>
+            <tr><td>2</td><td>0</td></tr>
+            <tr><td>3</td><td>3</td></tr>
+          </table>
+        </div>
+        <div class="mem-col">
+          <div class="mem-hd">RAM (physical frames)</div>
+          <div class="mem-cell"><span class="mem-n">Frame 0</span><div class="mem-b bA">A: Page 2</div></div>
+          <div class="mem-cell"><span class="mem-n">Frame 1</span><div class="mem-b bB">Process B</div></div>
+          <div class="mem-cell"><span class="mem-n">Frame 2</span><div class="mem-b bA">A: Page 0</div></div>
+          <div class="mem-cell"><span class="mem-n">Frame 3</span><div class="mem-b bA">A: Page 3</div></div>
+          <div class="mem-cell"><span class="mem-n">Frame 4</span><div class="mem-b bF">free</div></div>
+          <div class="mem-cell"><span class="mem-n">Frame 5</span><div class="mem-b bA">A: Page 1</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-bottom:16px;">
+      <div style="background:#e8f5e9;border-radius:8px;padding:14px 16px;font-size:13pt;"><strong style="color:#388e3c;">Benefits</strong><ul style="margin:6px 0 0;padding-left:1.2em;"><li>Pages fit into any free frame, so memory is used efficiently</li><li>No <strong>external fragmentation</strong> — there are no awkward gaps between blocks</li><li>Easy for the OS to track: every block is the same size</li><li>Makes virtual memory possible (Section 4)</li></ul></div>
+      <div style="background:#ffebee;border-radius:8px;padding:14px 16px;font-size:13pt;"><strong style="color:#C62828;">Drawbacks</strong><ul style="margin:6px 0 0;padding-left:1.2em;"><li><strong>Internal fragmentation:</strong> the last page of a process is usually only partly full, wasting space</li><li>Page tables take up memory themselves</li><li>Pages are physical divisions — a page may cut a subroutine or data structure in half</li></ul></div>
+    </div>
+    <div style="border-left:4px solid #e65100;background:#fff3e0;padding:12px 16px;border-radius:0 6px 6px 0;">
+      <strong style="color:#e65100;">Worked example:</strong> pages are 4 KB and a process needs 13 KB. It needs <strong>4 pages</strong> (3 pages only hold 12 KB). The 4th page holds just 1 KB, so <strong>3 KB is wasted</strong> — that is internal fragmentation.
+    </div>
+  </div>
+
+  <!-- Activity 5 — place pages in frames -->
+  <div class="act" data-n="5" style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 5 — Use the page table to fill RAM</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:10px;line-height:1.5;">Process C has the page table below. Drag each page into the frame where it is stored. Frames 2 and 4 already belong to another process. One chip is not needed.</div>
+    <div class="drag-bank" id="bank5">
+      <div class="drag-chip" draggable="true">Page 2</div>
+      <div class="drag-chip" draggable="true">Page 4</div>
+      <div class="drag-chip" draggable="true">Page 0</div>
+      <div class="drag-chip" draggable="true">Page 3</div>
+      <div class="drag-chip" draggable="true">Page 1</div>
+    </div>
+    <div class="g2" style="align-items:start;">
+      <div>
+        <div class="mem-hd">Process C page table</div>
+        <table class="cx-tbl" style="font-size:12pt;">
+          <tr><th>Page</th><th>Frame</th></tr>
+          <tr><td>0</td><td>3</td></tr>
+          <tr><td>1</td><td>0</td></tr>
+          <tr><td>2</td><td>5</td></tr>
+          <tr><td>3</td><td>1</td></tr>
+        </table>
+      </div>
+      <div class="mem-col">
+        <div class="mem-hd">RAM</div>
+        <div class="mem-cell"><span class="mem-n">Frame 0</span><div class="mem-b bF" style="border-style:solid;padding:4px;"><span id="dz5a" class="drop-zone"></span></div></div>
+        <div class="mem-cell"><span class="mem-n">Frame 1</span><div class="mem-b bF" style="border-style:solid;padding:4px;"><span id="dz5b" class="drop-zone"></span></div></div>
+        <div class="mem-cell"><span class="mem-n">Frame 2</span><div class="mem-b bB">Process D</div></div>
+        <div class="mem-cell"><span class="mem-n">Frame 3</span><div class="mem-b bF" style="border-style:solid;padding:4px;"><span id="dz5c" class="drop-zone"></span></div></div>
+        <div class="mem-cell"><span class="mem-n">Frame 4</span><div class="mem-b bB">Process D</div></div>
+        <div class="mem-cell"><span class="mem-n">Frame 5</span><div class="mem-b bF" style="border-style:solid;padding:4px;"><span id="dz5d" class="drop-zone"></span></div></div>
+      </div>
+    </div>
+    <button class="check-btn" id="btn5" onclick="checkDrop5()">&#10003; Check my RAM</button>
+    <div class="drag-result" id="res5"></div>
+  </div>
+
+  <!-- Activity 6 — MCQ correct=b -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 6 — Multiple choice — calculate</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;line-height:1.5;">The page size is 4 KB. A process needs 10 KB of memory. How many pages does it need, and how much space is wasted?</div>
+    <div id="opts6">
+      <div class="opt" onclick="pickOpt(6,'a',this)">a) 2 pages, 2 KB wasted</div>
+      <div class="opt" onclick="pickOpt(6,'b',this)">b) 3 pages, 2 KB wasted</div>
+      <div class="opt" onclick="pickOpt(6,'c',this)">c) 3 pages, no space wasted</div>
+      <div class="opt" onclick="pickOpt(6,'d',this)">d) 10 pages, no space wasted</div>
+    </div>
+    <div class="fb" id="fb6"></div>
+  </div>
+
+  <!-- Activity 7 — word chip correct=c -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 7 — Fill in the gap</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:16px;line-height:1.6;">In paging, physical memory is divided into fixed-size blocks called <span style="background:#1e1e2e;color:#fab387;font-family:'Courier New',monospace;padding:2px 10px;border-radius:4px;font-size:13pt;">&#9744;</span>, which are exactly the same size as pages.</div>
+    <div id="opts7w">
+      <span class="wopt" onclick="pickWopt(7,'a',this)">segments</span>
+      <span class="wopt" onclick="pickWopt(7,'b',this)">sectors</span>
+      <span class="wopt" onclick="pickWopt(7,'c',this)">frames</span>
+      <span class="wopt" onclick="pickWopt(7,'d',this)">stacks</span>
+    </div>
+    <div class="fb" id="fb7"></div>
+  </div>
+
+  <!-- Activity 8 — TF -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 8 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;">Click True or False for each statement about paging.</div>
+    <div class="tf-row" id="tf5">
+      <div class="tf-stmt">With paging, all the pages of a process must be stored in frames that are next to each other.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(5,true,false)">True</button><button class="tf-btn" onclick="doTF(5,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf6">
+      <div class="tf-stmt">The page table records which frame each page of a process is stored in.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(6,true,true)">True</button><button class="tf-btn" onclick="doTF(6,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf7">
+      <div class="tf-stmt">Paging can waste space inside the last page of a process (internal fragmentation).</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(7,true,true)">True</button><button class="tf-btn" onclick="doTF(7,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf8">
+      <div class="tf-stmt">Pages are different sizes so that each one fits a whole subroutine exactly.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(8,true,false)">True</button><button class="tf-btn" onclick="doTF(8,false,false)">False</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 3 — SEGMENTATION
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Segmentation</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~15 minutes</div>
+  </div>
+
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <p style="margin:0 0 14px;"><strong>Segmentation</strong> splits a process into <strong>logical sections called segments</strong>, which match the structure of the program — for example a <strong>code</strong> segment, a <strong>data</strong> segment and a <strong>stack</strong> segment, or one segment per module. Because they follow the program, segments are <strong>different sizes</strong>.</p>
+    <p style="margin:0 0 14px;">Each segment is loaded into one continuous area of RAM. The OS keeps a <strong>segment table</strong> giving each segment's <strong>base</strong> (its start address in RAM) and its <strong>limit</strong> (its length). An address in a program is given as a segment number plus an <strong>offset</strong> inside that segment.</p>
+
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div>
+        <div class="mem-hd">Segment table — Process A</div>
+        <table class="cx-tbl" style="font-size:12pt;">
+          <tr><th>Segment</th><th>Base</th><th>Limit</th></tr>
+          <tr><td>0 — Code</td><td>1000</td><td>500</td></tr>
+          <tr><td>1 — Data</td><td>3000</td><td>400</td></tr>
+          <tr><td>2 — Stack</td><td>6000</td><td>300</td></tr>
+        </table>
+        <div style="background:#e3f2fd;border-radius:8px;padding:12px 14px;margin-top:12px;font-size:12.5pt;">
+          <strong style="color:#007BA6;">Translating an address</strong><br>
+          Segment 1, offset 120:<br>
+          1. Is 120 &lt; limit 400? Yes &rarr; allowed.<br>
+          2. Physical address = base + offset = 3000 + 120 = <strong>3120</strong>.<br>
+          An offset of 450 would be <strong>refused</strong> — it is beyond the limit, so this protects other memory.
+        </div>
+      </div>
+      <div class="mem-col">
+        <div class="mem-hd">RAM</div>
+        <div class="mem-cell"><span class="mem-n">0</span><div class="mem-b" style="background:#333;color:#fff;border-color:#333;min-height:44px;">OS</div></div>
+        <div class="mem-cell"><span class="mem-n">1000</span><div class="mem-b bA" style="min-height:56px;">Code (500)</div></div>
+        <div class="mem-cell"><span class="mem-n">1500</span><div class="mem-b bF" style="min-height:44px;">free gap</div></div>
+        <div class="mem-cell"><span class="mem-n">3000</span><div class="mem-b bC" style="min-height:48px;">Data (400)</div></div>
+        <div class="mem-cell"><span class="mem-n">3400</span><div class="mem-b bF" style="min-height:44px;">free gap</div></div>
+        <div class="mem-cell"><span class="mem-n">6000</span><div class="mem-b bD" style="min-height:40px;">Stack (300)</div></div>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-bottom:16px;">
+      <div style="background:#e8f5e9;border-radius:8px;padding:14px 16px;font-size:13pt;"><strong style="color:#388e3c;">Benefits</strong><ul style="margin:6px 0 0;padding-left:1.2em;"><li>Segments match the program's logical structure</li><li>Each segment can have its own protection (e.g. code is read-only)</li><li>Segments such as shared library code can be shared between processes</li><li>No internal fragmentation — a segment is exactly as big as needed</li></ul></div>
+      <div style="background:#ffebee;border-radius:8px;padding:14px 16px;font-size:13pt;"><strong style="color:#C62828;">Drawbacks</strong><ul style="margin:6px 0 0;padding-left:1.2em;"><li><strong>External fragmentation:</strong> as segments are loaded and removed, small gaps of free memory appear between them that may be too small to use</li><li>Harder to find space: a segment needs one continuous gap big enough to hold it</li><li>More complex to manage than equal-size pages</li></ul></div>
+    </div>
+    <div style="border-left:4px solid #9966FF;background:#f3e5f5;padding:12px 16px;border-radius:0 6px 6px 0;">
+      <strong style="color:#9966FF;">Key difference:</strong> paging divides memory <strong>physically</strong> into equal blocks; segmentation divides a program <strong>logically</strong> into meaningful, variable-size parts.
+    </div>
+  </div>
+
+  <!-- Activity 9 — MCQ correct=b -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 9 — Multiple choice — translate the address</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;line-height:1.5;">Using the segment table above, what physical address does <strong>segment 2, offset 250</strong> refer to?</div>
+    <div id="opts9">
+      <div class="opt" onclick="pickOpt(9,'a',this)">a) 252</div>
+      <div class="opt" onclick="pickOpt(9,'b',this)">b) 6250</div>
+      <div class="opt" onclick="pickOpt(9,'c',this)">c) 6000</div>
+      <div class="opt" onclick="pickOpt(9,'d',this)">d) It is refused because the offset is beyond the limit</div>
+    </div>
+    <div class="fb" id="fb9"></div>
+  </div>
+
+  <!-- Activity 10 — sort paging/segmentation -->
+  <div class="act" data-n="10" style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#8644; Activity 10 — Sort: paging or segmentation?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:6px;line-height:1.5;">Drag each feature into the technique it describes.</div>
+    <div class="drag-bank long-chips" id="bank10">
+      <div class="drag-chip" draggable="true">Blocks are all the same size</div>
+      <div class="drag-chip" draggable="true">Blocks match logical parts such as code, data and stack</div>
+      <div class="drag-chip" draggable="true">Uses a table of base and limit values</div>
+      <div class="drag-chip" draggable="true">Can waste space inside the last block</div>
+      <div class="drag-chip" draggable="true">Can leave unusable gaps between blocks</div>
+      <div class="drag-chip" draggable="true">Uses a table mapping pages to frames</div>
+    </div>
+    <div class="g2" style="margin-bottom:12px;">
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#007BA6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Paging</div>
+        <div id="sort10-pag" class="sort-zone drag-bank" style="border-color:#007BA6;background:#f0f8ff;min-height:120px;"></div>
+      </div>
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#388e3c;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Segmentation</div>
+        <div id="sort10-seg" class="sort-zone drag-bank" style="border-color:#388e3c;background:#f0f8f0;min-height:120px;"></div>
+      </div>
+    </div>
+    <button class="check-btn" id="btn10" onclick="checkSort10()">&#10003; Check my sort</button>
+    <div class="drag-result" id="res10"></div>
+  </div>
+
+  <!-- Activity 11 — word chip correct=b -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 11 — Fill in the gap</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:16px;line-height:1.6;">Small gaps of free memory left between variable-size segments, each too small to hold a new segment, are called <span style="background:#1e1e2e;color:#fab387;font-family:'Courier New',monospace;padding:2px 10px;border-radius:4px;font-size:13pt;">&#9744;</span> fragmentation.</div>
+    <div id="opts11w">
+      <span class="wopt" onclick="pickWopt(11,'a',this)">internal</span>
+      <span class="wopt" onclick="pickWopt(11,'b',this)">external</span>
+      <span class="wopt" onclick="pickWopt(11,'c',this)">logical</span>
+      <span class="wopt" onclick="pickWopt(11,'d',this)">virtual</span>
+    </div>
+    <div class="fb" id="fb11"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 4 — VIRTUAL MEMORY
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Virtual Memory</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~15 minutes</div>
+  </div>
+
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <p style="margin:0 0 14px;"><strong>Virtual memory</strong> uses part of <strong>secondary storage</strong> (an HDD or SSD) as if it were extra main memory. When RAM is full, the OS moves pages that are not currently needed out of RAM to an area of the disk (often called the <strong>swap file</strong> or <strong>page file</strong>), freeing frames for pages that <em>are</em> needed. This is called <strong>swapping</strong> (or paging out / paging in).</p>
+    <p style="margin:0 0 14px;"><strong>Why is it needed?</strong> It lets the computer run programs that are larger than RAM, and run more programs at once than would fit in RAM. Only the pages a process is actually using need to be in RAM at any moment.</p>
+
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+      <div style="flex:1;min-width:220px;">
+        <div class="mem-hd">RAM (fast, small)</div>
+        <div class="mem-col">
+          <div class="mem-b bA">A: Page 0</div><div class="mem-b bC">B: Page 2</div><div class="mem-b bA">A: Page 3</div><div class="mem-b bE">C: Page 1</div>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:12pt;font-weight:700;color:#007BA6;min-width:120px;">
+        <div>page out &rarr;</div><div style="font-size:22pt;line-height:1;">&#8644;</div><div>&larr; page in</div>
+      </div>
+      <div style="flex:1;min-width:220px;">
+        <div class="mem-hd">Virtual memory on disk (slow, large)</div>
+        <div class="mem-col">
+          <div class="mem-b bA" style="opacity:0.7;">A: Page 1</div><div class="mem-b bA" style="opacity:0.7;">A: Page 2</div><div class="mem-b bC" style="opacity:0.7;">B: Page 0</div><div class="mem-b bC" style="opacity:0.7;">B: Page 1</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:8px;">What happens on a page fault</div>
+    <p style="margin:0 0 10px;font-size:13pt;">A <strong>page fault</strong> happens when a process tries to use a page that is in virtual memory, not in RAM. The OS then:</p>
+    <ol style="margin:0 0 16px;padding-left:1.4em;font-size:13pt;line-height:1.8;">
+      <li>pauses the process (it becomes blocked while the disk is read);</li>
+      <li>if RAM is full, chooses a page that has not been used recently and swaps it out to disk;</li>
+      <li>loads the needed page from disk into the free frame;</li>
+      <li>updates the page table, then lets the process carry on.</li>
+    </ol>
+
+    <div class="g2" style="margin-bottom:16px;">
+      <div style="background:#e8f5e9;border-radius:8px;padding:14px 16px;font-size:13pt;"><strong style="color:#388e3c;">Benefits</strong><ul style="margin:6px 0 0;padding-left:1.2em;"><li>Programs bigger than RAM can run</li><li>More processes can be open at once</li><li>Cheaper than buying more RAM</li></ul></div>
+      <div style="background:#ffebee;border-radius:8px;padding:14px 16px;font-size:13pt;"><strong style="color:#C62828;">Drawbacks</strong><ul style="margin:6px 0 0;padding-left:1.2em;"><li>Disks are far slower than RAM, so every page fault slows things down</li><li><strong>Thrashing</strong> — see below</li><li>Uses up disk space</li></ul></div>
+    </div>
+    <div style="border-left:4px solid #e65100;background:#fff3e0;padding:12px 16px;border-radius:0 6px 6px 0;">
+      <strong style="color:#e65100;">Thrashing:</strong> if too many processes are running for the amount of RAM, pages are swapped in and out constantly. The computer spends more time moving pages than running programs, the disk light stays on, and everything becomes extremely slow.
+    </div>
+  </div>
+
+  <!-- Activity 12 — order page fault -->
+  <div class="act" data-n="12" style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#8645; Activity 12 — Put the page fault steps in order</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:6px;line-height:1.5;">RAM is full. Drag the steps into the order they happen.</div>
+    <div class="drag-bank long-chips" id="bank12">
+      <div class="drag-chip" draggable="true">The needed page is loaded into the freed frame</div>
+      <div class="drag-chip" draggable="true">A process tries to use a page that is not in RAM</div>
+      <div class="drag-chip" draggable="true">The process carries on from where it stopped</div>
+      <div class="drag-chip" draggable="true">A page fault occurs and the OS takes over</div>
+      <div class="drag-chip" draggable="true">The page table is updated</div>
+      <div class="drag-chip" draggable="true">A page not used recently is swapped out to disk</div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="cx-tbl" style="background:#fff;">
+        <tr><th style="width:50px;">Step</th><th>What happens</th></tr>
+        <tr><td>1</td><td><span id="dz12a" class="drop-zone" style="width:100%;"></span></td></tr>
+        <tr><td>2</td><td><span id="dz12b" class="drop-zone" style="width:100%;"></span></td></tr>
+        <tr><td>3</td><td><span id="dz12c" class="drop-zone" style="width:100%;"></span></td></tr>
+        <tr><td>4</td><td><span id="dz12d" class="drop-zone" style="width:100%;"></span></td></tr>
+        <tr><td>5</td><td><span id="dz12e" class="drop-zone" style="width:100%;"></span></td></tr>
+        <tr><td>6</td><td><span id="dz12f" class="drop-zone" style="width:100%;"></span></td></tr>
+      </table>
+    </div>
+    <button class="check-btn" id="btn12" onclick="checkDrop12()">&#10003; Check my order</button>
+    <div class="drag-result" id="res12"></div>
+  </div>
+
+  <!-- Activity 13 — MCQ correct=d -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 13 — Multiple choice</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;line-height:1.5;">A student has 40 browser tabs, a game and a video editor open on a laptop with little RAM. The laptop becomes very slow and the disk is busy all the time. What is the most likely cause?</div>
+    <div id="opts13">
+      <div class="opt" onclick="pickOpt(13,'a',this)">a) The CPU's clock speed has dropped</div>
+      <div class="opt" onclick="pickOpt(13,'b',this)">b) External fragmentation in the segment table</div>
+      <div class="opt" onclick="pickOpt(13,'c',this)">c) A stack overflow in the video editor</div>
+      <div class="opt" onclick="pickOpt(13,'d',this)">d) Thrashing — pages are constantly being swapped between RAM and virtual memory</div>
+    </div>
+    <div class="fb" id="fb13"></div>
+  </div>
+
+  <!-- Activity 14 — word chip correct=a -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 14 — Fill in the gap</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:16px;line-height:1.6;">When a process tries to access a page that is currently stored in virtual memory instead of RAM, a <span style="background:#1e1e2e;color:#fab387;font-family:'Courier New',monospace;padding:2px 10px;border-radius:4px;font-size:13pt;">&#9744;</span> occurs.</div>
+    <div id="opts14w">
+      <span class="wopt" onclick="pickWopt(14,'a',this)">page fault</span>
+      <span class="wopt" onclick="pickWopt(14,'b',this)">stack overflow</span>
+      <span class="wopt" onclick="pickWopt(14,'c',this)">context switch</span>
+      <span class="wopt" onclick="pickWopt(14,'d',this)">segment limit</span>
+    </div>
+    <div class="fb" id="fb14"></div>
+  </div>
+
+  <!-- Activity 15 — TF -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 15 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;">Click True or False for each statement about virtual memory.</div>
+    <div class="tf-row" id="tf9">
+      <div class="tf-stmt">Virtual memory allows a program larger than the available RAM to run.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(9,true,true)">True</button><button class="tf-btn" onclick="doTF(9,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf10">
+      <div class="tf-stmt">Accessing a page in virtual memory is just as fast as accessing a page in RAM.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(10,true,false)">True</button><button class="tf-btn" onclick="doTF(10,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf11">
+      <div class="tf-stmt">The CPU can execute instructions directly from virtual memory on the disk.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(11,true,false)">True</button><button class="tf-btn" onclick="doTF(11,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf12">
+      <div class="tf-stmt">Adding more RAM is one way to reduce thrashing.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(12,true,true)">True</button><button class="tf-btn" onclick="doTF(12,false,true)">False</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 5 — STACK FRAMES
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Stack Frames</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~20 minutes</div>
+  </div>
+
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <p style="margin:0 0 14px;">Every process has an area of memory called the <strong>call stack</strong>. It is a <strong>last in, first out (LIFO)</strong> structure. Each time a subroutine (function or procedure) is called, a new <strong>stack frame</strong> is <strong>pushed</strong> onto the top of the stack. When the subroutine finishes, its frame is <strong>popped</strong> off and its memory is released.</p>
+
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div style="background:#e3f2fd;border-radius:8px;padding:16px 18px;border-top:4px solid #007BA6;">
+        <div style="font-weight:700;color:#007BA6;font-size:14pt;margin-bottom:8px;">A stack frame holds</div>
+        <ul style="margin:0;padding-left:1.2em;font-size:13pt;line-height:1.8;">
+          <li>the <strong>return address</strong> — where to carry on in the calling code once the subroutine ends;</li>
+          <li>the <strong>parameters</strong> passed to the subroutine;</li>
+          <li>the subroutine's <strong>local variables</strong>;</li>
+          <li><strong>saved register values</strong> that must be restored afterwards.</li>
+        </ul>
+      </div>
+      <div style="background:#e8f5e9;border-radius:8px;padding:16px 18px;border-top:4px solid #388e3c;">
+        <div style="font-weight:700;color:#388e3c;font-size:14pt;margin-bottom:8px;">Why is it needed?</div>
+        <p style="margin:0 0 8px;font-size:13pt;">Subroutines call other subroutines. The stack frame lets the computer <strong>remember where to return</strong> and keeps each call's variables separate, so they do not overwrite each other.</p>
+        <p style="margin:0;font-size:13pt;">Memory for local variables is allocated automatically on a call and freed automatically on return — this is the OS and CPU <strong>controlling memory usage</strong> for you.</p>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div class="code"><div class="code-lbl">Python</div><span class="k">def</span> <span class="f">Square</span>(N):
+    <span class="k">return</span> N * N
+
+<span class="k">def</span> <span class="f">AddSquare</span>(A, B):
+    Result = <span class="f">Square</span>(A) + B
+    <span class="k">return</span> Result
+
+<span class="k">def</span> <span class="f">Main</span>():
+    Total = <span class="f">AddSquare</span>(<span class="v">3</span>, <span class="v">4</span>)
+    <span class="f">print</span>(Total)   <span class="cm"># 13</span>
+
+<span class="f">Main</span>()</div>
+      <div>
+        <div style="font-size:12pt;font-weight:700;color:#555;margin-bottom:4px;">The stack while Square(3) is running</div>
+        <div style="font-size:11pt;color:#555;margin-bottom:4px;">&#9650; top of stack (stack pointer)</div>
+        <div class="stack">
+          <div class="frame" style="background:#9966FF;"><div class="frame-h">Square</div><div class="frame-b">parameter N = 3 &bull; return address in AddSquare</div></div>
+          <div class="frame" style="background:#388e3c;"><div class="frame-h">AddSquare</div><div class="frame-b">parameters A = 3, B = 4 &bull; local Result &bull; return address in Main</div></div>
+          <div class="frame" style="background:#007BA6;"><div class="frame-h">Main</div><div class="frame-b">local Total &bull; return address in the main program</div></div>
+        </div>
+        <div style="font-size:11pt;color:#555;margin-top:4px;">bottom of stack</div>
+        <p style="font-size:12pt;margin:10px 0 0;">When Square returns 9, its frame is popped and AddSquare continues at its return address. AddSquare then returns 13 and its frame is popped, leaving only Main.</p>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-bottom:14px;">
+      <div style="background:#e8f5e9;border-radius:8px;padding:14px 16px;font-size:13pt;"><strong style="color:#388e3c;">Benefits</strong><ul style="margin:6px 0 0;padding-left:1.2em;"><li>Memory is allocated and freed automatically and very quickly</li><li>Makes nested subroutine calls and recursion possible</li><li>Each call's local variables are kept separate</li></ul></div>
+      <div style="background:#ffebee;border-radius:8px;padding:14px 16px;font-size:13pt;"><strong style="color:#C62828;">Drawbacks</strong><ul style="margin:6px 0 0;padding-left:1.2em;"><li>The stack has a limited size</li><li>Very deep or never-ending recursion pushes too many frames, causing a <strong>stack overflow</strong> and the program crashes</li><li>Local variables are lost when the frame is popped</li></ul></div>
+    </div>
+    <div style="border-left:4px solid #e65100;background:#fff3e0;padding:12px 16px;border-radius:0 6px 6px 0;">
+      <strong style="color:#e65100;">Recursion:</strong> each recursive call gets its own new stack frame, with its own copy of the parameters and local variables. A recursive subroutine without a working base case keeps pushing frames until the stack overflows.
+    </div>
+  </div>
+
+  <!-- Activity 16 — complete the stack -->
+  <div class="act" data-n="16" style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 16 — Complete the call stack</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:10px;line-height:1.5;">This program is running. Complete the stack <u>at the moment Double is executing</u>. Two chips are not needed.</div>
+    <div class="g2" style="align-items:start;">
+      <div>
+        <div class="code" style="margin-bottom:12px;"><span class="k">def</span> <span class="f">Double</span>(X):
+    <span class="k">return</span> X * <span class="v">2</span>
+
+<span class="k">def</span> <span class="f">Process</span>(Price, Qty):
+    Cost = Price * Qty
+    <span class="k">return</span> <span class="f">Double</span>(Cost)
+
+<span class="k">def</span> <span class="f">Main</span>():
+    Answer = <span class="f">Process</span>(<span class="v">5</span>, <span class="v">2</span>)
+
+<span class="f">Main</span>()</div>
+        <div class="drag-bank" id="bank16">
+          <div class="drag-chip" draggable="true">Price = 5, Qty = 2</div>
+          <div class="drag-chip" draggable="true">Main</div>
+          <div class="drag-chip" draggable="true">X = 20</div>
+          <div class="drag-chip" draggable="true">Double</div>
+          <div class="drag-chip" draggable="true">X = 10</div>
+          <div class="drag-chip" draggable="true">Process</div>
+          <div class="drag-chip" draggable="true">Answer = 20</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11pt;color:#555;margin-bottom:4px;">&#9650; top of stack</div>
+        <div class="sframe">
+          <div class="sframe-lbl">Subroutine:</div><span id="dz16a" class="drop-zone"></span>
+          <div class="sframe-lbl">Parameter value:</div><span id="dz16b" class="drop-zone"></span>
+        </div>
+        <div class="sframe">
+          <div class="sframe-lbl">Subroutine:</div><span id="dz16c" class="drop-zone"></span>
+          <div class="sframe-lbl">Parameter values:</div><span id="dz16d" class="drop-zone"></span>
+        </div>
+        <div class="sframe">
+          <div class="sframe-lbl">Subroutine:</div><span id="dz16e" class="drop-zone"></span>
+        </div>
+        <div style="font-size:11pt;color:#555;margin-top:2px;">bottom of stack</div>
+      </div>
+    </div>
+    <button class="check-btn" id="btn16" onclick="checkDrop16()">&#10003; Check my stack</button>
+    <div class="drag-result" id="res16"></div>
+  </div>
+
+  <!-- Activity 17 — MCQ correct=a -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 17 — Multiple choice</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;line-height:1.5;">In Activity 16, Double finishes and returns 20. What happens next?</div>
+    <div id="opts17">
+      <div class="opt" onclick="pickOpt(17,'a',this)">a) Double's frame is popped, and Process carries on from the return address stored in that frame</div>
+      <div class="opt" onclick="pickOpt(17,'b',this)">b) All three frames are popped and the program ends</div>
+      <div class="opt" onclick="pickOpt(17,'c',this)">c) Main's frame is popped because it is at the bottom</div>
+      <div class="opt" onclick="pickOpt(17,'d',this)">d) Double's frame stays on the stack so X can be used again later</div>
+    </div>
+    <div class="fb" id="fb17"></div>
+  </div>
+
+  <!-- Activity 18 — sort contents -->
+  <div class="act" data-n="18" style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#8644; Activity 18 — Sort: in a stack frame or not?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:6px;line-height:1.5;">Drag each item into the correct column.</div>
+    <div class="drag-bank" id="bank18">
+      <div class="drag-chip" draggable="true">Return address</div>
+      <div class="drag-chip" draggable="true">The page table</div>
+      <div class="drag-chip" draggable="true">Local variables</div>
+      <div class="drag-chip" draggable="true">Global variables</div>
+      <div class="drag-chip" draggable="true">Parameters</div>
+      <div class="drag-chip" draggable="true">The swap file</div>
+      <div class="drag-chip" draggable="true">Saved register values</div>
+    </div>
+    <div class="g2" style="margin-bottom:12px;">
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#388e3c;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Stored in a stack frame</div>
+        <div id="sort18-in" class="sort-zone drag-bank" style="border-color:#388e3c;background:#f0f8f0;min-height:120px;"></div>
+      </div>
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#C62828;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Not in a stack frame</div>
+        <div id="sort18-out" class="sort-zone drag-bank" style="border-color:#C62828;background:#fff5f5;min-height:120px;"></div>
+      </div>
+    </div>
+    <button class="check-btn" id="btn18" onclick="checkSort18()">&#10003; Check my sort</button>
+    <div class="drag-result" id="res18"></div>
+  </div>
+
+  <!-- Activity 19 — TF -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 19 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;">Click True or False for each statement about stack frames.</div>
+    <div class="tf-row" id="tf13">
+      <div class="tf-stmt">The call stack is a first in, first out (FIFO) structure.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(13,true,false)">True</button><button class="tf-btn" onclick="doTF(13,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf14">
+      <div class="tf-stmt">Each recursive call creates its own new stack frame.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(14,true,true)">True</button><button class="tf-btn" onclick="doTF(14,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf15">
+      <div class="tf-stmt">A recursive subroutine with no base case can cause a stack overflow.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(15,true,true)">True</button><button class="tf-btn" onclick="doTF(15,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf16">
+      <div class="tf-stmt">A subroutine's local variables keep their values after its stack frame has been popped.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(16,true,false)">True</button><button class="tf-btn" onclick="doTF(16,false,false)">False</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 6 — COMPARING & REVIEW
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">6</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Comparing &amp; Review</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~10 minutes</div>
+  </div>
+
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div style="overflow-x:auto;margin-bottom:16px;">
+      <table class="cx-tbl" style="font-size:12pt;min-width:640px;">
+        <tr><th></th><th>Paging</th><th>Segmentation</th><th>Virtual memory</th></tr>
+        <tr><td style="font-weight:700;">What it does</td><td>Splits memory into equal-size pages and frames</td><td>Splits a program into logical, variable-size segments</td><td>Uses disk space as an extension of RAM</td></tr>
+        <tr><td style="font-weight:700;">Table used</td><td>Page table (page &rarr; frame)</td><td>Segment table (base and limit)</td><td>Page table marks which pages are in RAM or on disk</td></tr>
+        <tr><td style="font-weight:700;">Main benefit</td><td>Any page fits any frame; no external fragmentation</td><td>Matches program structure; easy protection and sharing</td><td>Run programs larger than RAM; more programs at once</td></tr>
+        <tr><td style="font-weight:700;">Main drawback</td><td>Internal fragmentation</td><td>External fragmentation</td><td>Slow page faults; risk of thrashing</td></tr>
+      </table>
+    </div>
+    <div style="border-left:4px solid #007BA6;background:#e3f2fd;padding:12px 16px;border-radius:0 6px 6px 0;">
+      <strong style="color:#007BA6;">Exam tip:</strong> paging and segmentation are <em>ways of dividing up memory</em>; virtual memory is a <em>technique that uses</em> paging (or segmentation) together with the disk. When describing any of them, say how memory is divided, what table the OS keeps, and one benefit and one drawback.
+    </div>
+  </div>
+
+  <!-- Activity 20 — match -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9654; Activity 20 — Review: match the term to its definition</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;">Use the dropdowns to match each term to its definition.</div>
+    <div id="match2">
+      <div class="match-row"><div class="match-term">Paging</div><select class="match-sel" data-ans="pag"></select></div>
+      <div class="match-row"><div class="match-term">Segmentation</div><select class="match-sel" data-ans="seg"></select></div>
+      <div class="match-row"><div class="match-term">Virtual memory</div><select class="match-sel" data-ans="vm"></select></div>
+      <div class="match-row"><div class="match-term">Page fault</div><select class="match-sel" data-ans="pf"></select></div>
+      <div class="match-row"><div class="match-term">Thrashing</div><select class="match-sel" data-ans="thr"></select></div>
+      <div class="match-row"><div class="match-term">Stack frame</div><select class="match-sel" data-ans="sf"></select></div>
+    </div>
+    <button class="match-btn" id="match2-btn" onclick="checkMatch2()">&#10003; Check my answers</button>
+    <div class="match-result" id="match2-res"></div>
+  </div>
+
+  <!-- Activity 21 — MCQ correct=c -->
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 21 — Multiple choice</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:14px;line-height:1.5;">Which statement correctly compares paging and segmentation?</div>
+    <div id="opts21">
+      <div class="opt" onclick="pickOpt(21,'a',this)">a) Paging uses variable-size blocks; segmentation uses fixed-size blocks</div>
+      <div class="opt" onclick="pickOpt(21,'b',this)">b) Both techniques store each process in one continuous block of RAM</div>
+      <div class="opt" onclick="pickOpt(21,'c',this)">c) Paging divides memory into equal physical blocks; segmentation divides a program into logical parts of different sizes</div>
+      <div class="opt" onclick="pickOpt(21,'d',this)">d) Segmentation causes internal fragmentation; paging causes external fragmentation</div>
+    </div>
+    <div class="fb" id="fb21"></div>
+  </div>
+
+  <!-- Activity 22 — paragraph -->
+  <div class="act" data-n="22" style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 22 — Review: fill in the gaps</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:6px;line-height:1.5;">Drag a word into each gap to complete the paragraph. Three chips are not needed.</div>
+    <div class="drag-bank" id="bank22">
+      <div class="drag-chip" draggable="true">frames</div>
+      <div class="drag-chip" draggable="true">segments</div>
+      <div class="drag-chip" draggable="true">cache</div>
+      <div class="drag-chip" draggable="true">thrashing</div>
+      <div class="drag-chip" draggable="true">pages</div>
+      <div class="drag-chip" draggable="true">compiler</div>
+      <div class="drag-chip" draggable="true">virtual memory</div>
+      <div class="drag-chip" draggable="true">stack frame</div>
+      <div class="drag-chip" draggable="true">queue</div>
+      <div class="drag-chip" draggable="true">return address</div>
+    </div>
+    <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:16px 20px;font-size:14pt;line-height:2.6;">
+      In paging, a process is split into fixed-size <span id="dz22a" class="drop-zone"></span> that are loaded into equal-size <span id="dz22b" class="drop-zone"></span> in RAM. Segmentation instead splits a program into logical, variable-size <span id="dz22c" class="drop-zone"></span>. When RAM is full, <span id="dz22d" class="drop-zone"></span> uses space on the disk to hold pages that are not being used, but if pages are swapped too often the result is <span id="dz22e" class="drop-zone"></span>. Each time a subroutine is called, a <span id="dz22f" class="drop-zone"></span> is pushed onto the call stack, holding its parameters, local variables and <span id="dz22g" class="drop-zone"></span>.
+    </div>
+    <button class="check-btn" id="btn22" onclick="checkDrop22()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res22"></div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div style="background:#007BA6;border-radius:8px;padding:28px 32px;margin-bottom:20px;">
+  <div style="font-size:16pt;font-weight:700;color:#ffffff;margin-bottom:16px;">&#10003; Summary — Topic 1.2.4: Memory Management</div>
+  <div class="g2" style="gap:10px;">
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Operations:</strong> the OS tracks which memory is free or allocated, determines how much memory each process needs, and controls usage by allocating, freeing and protecting memory.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Paging:</strong> equal-size pages go into any free frames, tracked by a page table. No external fragmentation, but some internal fragmentation in the last page.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Segmentation:</strong> a program is split into logical, variable-size segments with a base and limit in a segment table. Good for protection and sharing, but causes external fragmentation.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Virtual memory:</strong> disk space acts as extra RAM. Lets larger and more programs run, but page faults are slow and too much swapping causes thrashing.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Stack frame:</strong> pushed onto the call stack on every subroutine call; holds the return address, parameters, local variables and saved registers; popped on return.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Stack overflow:</strong> the stack is limited in size, so very deep or endless recursion pushes too many frames and the program crashes.</div>
+  </div>
+</div>
+
+</div></div>
+<script>
+// ══════════════════════════════════════════════════
+//  BUILD MATCH DROPDOWNS
+// ══════════════════════════════════════════════════
+var MATCH_OPTS = {
+  match1: [
+    ['dealloc','Freeing memory so it can be used again, e.g. when a process ends'],
+    ['ram','Fast memory that holds the instructions and data of running processes'],
+    ['prot','Stopping a process from accessing memory that belongs to another process'],
+    ['map','A record of which blocks of memory are free and which process owns each allocated block'],
+    ['alloc','Giving a block of free memory to a process']
+  ],
+  match2: [
+    ['sf','The data pushed onto the call stack each time a subroutine is called'],
+    ['pf','An attempt to use a page that is not currently in RAM'],
+    ['pag','Dividing memory into equal-size blocks placed in any free frame'],
+    ['thr','So much swapping that the computer spends more time moving pages than running programs'],
+    ['vm','Using secondary storage as an extension of main memory'],
+    ['seg','Dividing a program into logical, variable-size parts']
+  ]
+};
+Object.keys(MATCH_OPTS).forEach(function(id) {
+  document.querySelectorAll('#' + id + ' .match-sel').forEach(function(sel) {
+    var h = '<option value="">— choose —</option>';
+    MATCH_OPTS[id].forEach(function(o){ h += '<option value="' + o[0] + '">' + o[1] + '</option>'; });
+    sel.innerHTML = h;
+  });
+});
+
+// ══════════════════════════════════════════════════
+//  MCQ
+// ══════════════════════════════════════════════════
+var mcqChosen = {};
+var MCQ_CORRECT = { 3:'c', 6:'b', 9:'b', 13:'d', 17:'a', 21:'c' };
+var MCQ_FB = {
+  3:{
+    ok:'&#10003; Correct! When a process ends, the OS deallocates its memory and updates the memory map to show those blocks as free, ready for another process.',
+    a:'&#10007; Leaving the blocks allocated would waste memory. The OS marks them as free as soon as P2 ends.',
+    b:'&#10007; Memory is not handed to another process automatically. The blocks are marked free, and the OS allocates them when a process needs them.',
+    d:'&#10007; The OS area does not grow like this. P2\'s blocks are simply marked as free in the memory map.'
+  },
+  6:{
+    ok:'&#10003; Correct! 2 pages only hold 8 KB, so 3 pages (12 KB) are needed. The last page holds just 2 KB of the process, so 12 &minus; 10 = 2 KB is wasted — internal fragmentation.',
+    a:'&#10007; 2 pages of 4 KB only give 8 KB, which is not enough for 10 KB. It needs 3 pages, wasting 2 KB.',
+    c:'&#10007; 3 pages give 12 KB but the process needs only 10 KB, so 2 KB inside the last page is wasted.',
+    d:'&#10007; Each page is 4 KB, not 1 KB. 10 KB needs 3 pages, with 2 KB wasted.'
+  },
+  9:{
+    ok:'&#10003; Correct! Segment 2 has base 6000 and limit 300. The offset 250 is less than 300, so it is allowed. 6000 + 250 = 6250.',
+    a:'&#10007; Add the offset to the segment\'s <em>base</em> address, not its number: 6000 + 250 = 6250.',
+    c:'&#10007; 6000 is the start of the segment. The offset 250 must be added: 6250.',
+    d:'&#10007; Segment 2\'s limit is 300 and the offset is 250, which is within the limit. The address is 6000 + 250 = 6250.'
+  },
+  13:{
+    ok:'&#10003; Correct! Too many programs for the amount of RAM means pages are constantly swapped to and from virtual memory. The disk is always busy and the computer slows dramatically — thrashing.',
+    a:'&#10007; The clues — little RAM, lots of programs, a constantly busy disk — point to thrashing, not the CPU.',
+    b:'&#10007; Fragmentation wastes some memory but does not keep the disk constantly busy. This is thrashing.',
+    c:'&#10007; A stack overflow would crash one program, not keep the disk busy. This is thrashing.'
+  },
+  17:{
+    ok:'&#10003; Correct! The stack is LIFO. Double\'s frame is on top, so it is popped first, and execution returns to Process using the return address that was stored in Double\'s frame.',
+    b:'&#10007; Only the frame of the subroutine that finished is popped. Process and Main are still running.',
+    c:'&#10007; The stack is last in, first out — the top frame (Double) is removed, not the bottom one.',
+    d:'&#10007; When a subroutine returns, its frame is popped and its local variables and parameters are gone.'
+  },
+  21:{
+    ok:'&#10003; Correct! Paging is a physical division into equal blocks; segmentation follows the logical structure of the program, so segments vary in size.',
+    a:'&#10007; It is the other way round: pages are fixed size; segments vary in size.',
+    b:'&#10007; Paging lets pages be scattered across any frames. Only each individual segment needs to be continuous.',
+    d:'&#10007; It is the other way round: paging causes internal fragmentation; segmentation causes external fragmentation.'
+  }
+};
+function pickOpt(qNum, letter, el) {
+  if (mcqChosen[qNum]) return;
+  mcqChosen[qNum] = true;
+  var correct = MCQ_CORRECT[qNum], isOk = (letter === correct);
+  var box = document.getElementById('opts' + qNum), fb = document.getElementById('fb' + qNum);
+  box.querySelectorAll('.opt').forEach(function(o) {
+    o.classList.add('locked');
+    var m = o.getAttribute('onclick').match(/pickOpt\(\d+,'([a-d])'/), v = m ? m[1] : '';
+    if (v === correct) o.classList.add(isOk ? 'correct' : 'reveal');
+    else if (v === letter && !isOk) o.classList.add('wrong');
+  });
+  fb.style.display = 'block';
+  fb.className = 'fb ' + (isOk ? 'fb-ok' : 'fb-bad');
+  fb.innerHTML = isOk ? MCQ_FB[qNum].ok : (MCQ_FB[qNum][letter] || '&#10007; Not quite — the correct answer is highlighted in green above.');
+}
+
+// ══════════════════════════════════════════════════
+//  WORD CHIPS
+// ══════════════════════════════════════════════════
+var woptChosen = {};
+var WOPT_CORRECT = { 7:'c', 11:'b', 14:'a' };
+var WOPT_FB = {
+  7:{
+    ok:'&#10003; Correct! RAM is divided into <strong>frames</strong>, each the same size as a page, so any page fits any free frame.',
+    a:'&#10007; Segments are the variable-size parts used in segmentation. In paging, RAM is divided into <strong>frames</strong>.',
+    b:'&#10007; Sectors are divisions of a disk. In paging, RAM is divided into <strong>frames</strong>.',
+    d:'&#10007; The stack is used for subroutine calls. In paging, RAM is divided into <strong>frames</strong>.'
+  },
+  11:{
+    ok:'&#10003; Correct! <strong>External</strong> fragmentation is wasted free space <em>between</em> blocks. It is the main drawback of segmentation.',
+    a:'&#10007; Internal fragmentation is wasted space <em>inside</em> a block, as in the last page of a process. Gaps <em>between</em> segments are <strong>external</strong> fragmentation.',
+    c:'&#10007; There is no "logical fragmentation". Gaps between segments are <strong>external</strong> fragmentation.',
+    d:'&#10007; Virtual memory is a different technique. Gaps between segments are <strong>external</strong> fragmentation.'
+  },
+  14:{
+    ok:'&#10003; Correct! A <strong>page fault</strong> tells the OS to fetch the page from disk into RAM before the process can continue.',
+    b:'&#10007; A stack overflow happens when the call stack runs out of space. A missing page causes a <strong>page fault</strong>.',
+    c:'&#10007; A context switch is when the CPU changes process. A missing page causes a <strong>page fault</strong>.',
+    d:'&#10007; The segment limit is part of segmentation. A missing page causes a <strong>page fault</strong>.'
+  }
+};
+function pickWopt(qNum, letter, el) {
+  if (woptChosen[qNum]) return;
+  woptChosen[qNum] = true;
+  var container = el.parentNode, correct = WOPT_CORRECT[qNum], isOk = (letter === correct);
+  container.querySelectorAll('.wopt').forEach(function(w) {
+    w.classList.add('locked');
+    var m = w.getAttribute('onclick').match(/pickWopt\(\d+,'([a-d])'/), v = m ? m[1] : '';
+    if (v === correct) w.classList.add(isOk ? 'correct' : 'reveal');
+    else if (v === letter && !isOk) w.classList.add('wrong');
+  });
+  var fb = document.getElementById('fb' + qNum);
+  fb.style.display = 'block';
+  fb.className = 'fb ' + (isOk ? 'fb-ok' : 'fb-bad');
+  fb.innerHTML = isOk ? WOPT_FB[qNum].ok : (WOPT_FB[qNum][letter] || '&#10007; Not quite — the correct answer is highlighted above.');
+}
+
+// ══════════════════════════════════════════════════
+//  TRUE / FALSE
+// ══════════════════════════════════════════════════
+var TF_DATA = {
+  1:{ ok:'&#10003; True! The CPU fetches instructions from main memory, so a process must be loaded into RAM to run.', bad:'&#10007; This is True. The CPU can only fetch instructions and data from main memory.' },
+  2:{ ok:'&#10003; Correct — False! Memory protection means each process can only access its own allocated memory.', bad:'&#10007; This is False. The OS protects each process\'s memory from the others.' },
+  3:{ ok:'&#10003; True! Programs often ask for more memory as they run — e.g. when opening a large file — so the OS keeps determining requirements while they run.', bad:'&#10007; This is True. Processes can request more memory while running, and the OS must handle those requests.' },
+  4:{ ok:'&#10003; Correct — False! When a process ends, its memory is deallocated and can be given to another process.', bad:'&#10007; This is False. Freed memory is marked as available and reused.' },
+  5:{ ok:'&#10003; Correct — False! Pages can be placed in any free frames anywhere in RAM — that is the main advantage of paging.', bad:'&#10007; This is False. Pages do not need to be next to each other; the page table records where each one is.' },
+  6:{ ok:'&#10003; True! The page table maps each page number to the frame number where that page is stored.', bad:'&#10007; This is True. The page table maps pages to frames.' },
+  7:{ ok:'&#10003; True! The last page is rarely full, so some of it is wasted — internal fragmentation.', bad:'&#10007; This is True. Unused space in the last page is internal fragmentation.' },
+  8:{ ok:'&#10003; Correct — False! Pages are all the same fixed size. Variable-size parts that follow program structure are segments.', bad:'&#10007; This is False. All pages are the same size and take no notice of program structure.' },
+  9:{ ok:'&#10003; True! Only the pages in use need to be in RAM; the rest wait in virtual memory on disk.', bad:'&#10007; This is True. Virtual memory means not all of a program has to be in RAM at once.' },
+  10:{ ok:'&#10003; Correct — False! Secondary storage is many times slower than RAM, so using virtual memory slows the computer down.', bad:'&#10007; This is False. Disks are much slower than RAM, which is why page faults are costly.' },
+  11:{ ok:'&#10003; Correct — False! A page in virtual memory must be loaded back into RAM before the CPU can use it.', bad:'&#10007; This is False. The CPU only works with RAM; the page must be paged in first.' },
+  12:{ ok:'&#10003; True! More RAM means fewer pages need to be swapped out, so thrashing becomes less likely. Closing programs also helps.', bad:'&#10007; This is True. Extra RAM reduces the need to swap pages.' },
+  13:{ ok:'&#10003; Correct — False! The stack is last in, first out (LIFO): the most recent call is the first to finish.', bad:'&#10007; This is False. The call stack is LIFO — last in, first out.' },
+  14:{ ok:'&#10003; True! Every call, including each recursive call, gets its own frame with its own parameters and local variables.', bad:'&#10007; This is True. Each recursive call pushes a separate stack frame.' },
+  15:{ ok:'&#10003; True! Without a base case the calls never stop, frames keep being pushed and the stack runs out of space.', bad:'&#10007; This is True. Endless recursion pushes frames until the stack overflows.' },
+  16:{ ok:'&#10003; Correct — False! When the frame is popped, its local variables are gone. Only the returned value is passed back.', bad:'&#10007; This is False. Local variables are stored in the frame, so they disappear when it is popped.' }
+};
+function doTF(n, userAns, correctAns) {
+  var row = document.getElementById('tf' + n);
+  if (!row || row.classList.contains('done')) return;
+  row.classList.add('done');
+  var isOk = (userAns === correctAns);
+  row.querySelectorAll('.tf-btn').forEach(function(b) {
+    var bT = b.textContent.trim() === 'True';
+    if (bT === userAns) b.className = isOk ? 'tf-btn ok' : 'tf-btn bad';
+    if (!isOk && bT === correctAns) b.className = 'tf-btn show';
+  });
+  var fb = document.createElement('div');
+  fb.style.cssText = 'margin-top:8px;padding:10px 14px;border-radius:6px;font-size:13pt;line-height:1.6;font-family:Lato,sans-serif;';
+  fb.style.background = isOk ? '#e8f5e9' : '#ffebee';
+  fb.style.color      = isOk ? '#1b5e20' : '#7f0000';
+  fb.style.border     = isOk ? '1px solid #81c784' : '1px solid #ef9a9a';
+  fb.innerHTML = isOk ? TF_DATA[n].ok : TF_DATA[n].bad;
+  row.appendChild(fb);
+}
+
+// ══════════════════════════════════════════════════
+//  MATCH
+// ══════════════════════════════════════════════════
+function runMatch(matchId, btnId, resId, okMsg, badMsg) {
+  var rows = document.querySelectorAll('#' + matchId + ' .match-row'), allOk = true;
+  rows.forEach(function(row) {
+    row.classList.remove('ok','bad');
+    var sel = row.querySelector('.match-sel');
+    if (sel.value === sel.getAttribute('data-ans')) row.classList.add('ok');
+    else { row.classList.add('bad'); allOk = false; }
+  });
+  var res = document.getElementById(resId);
+  res.style.display = 'block';
+  if (allOk) {
+    res.className = 'match-result fb fb-ok'; res.innerHTML = '&#10003; ' + okMsg;
+    document.getElementById(btnId).disabled = true;
+    rows.forEach(function(r){ r.querySelector('.match-sel').disabled = true; });
+  } else {
+    res.className = 'match-result fb fb-bad'; res.innerHTML = '&#10007; ' + badMsg;
+  }
+}
+function checkMatch1() {
+  runMatch('match1','match1-btn','match1-res',
+    'All correct! <strong>RAM</strong> holds running processes; the <strong>memory map</strong> tracks it; <strong>allocation</strong> gives memory out; <strong>deallocation</strong> frees it; <strong>protection</strong> keeps processes apart.',
+    'One or more are wrong — check those in red. Allocation <em>gives</em> memory; deallocation <em>frees</em> it.');
+}
+function checkMatch2() {
+  runMatch('match2','match2-btn','match2-res',
+    'All six correct! You know the key memory management vocabulary.',
+    'One or more are wrong. Remember: paging = equal blocks; segmentation = logical parts; a page fault = page not in RAM; thrashing = too much swapping.');
+}
+
+// ══════════════════════════════════════════════════
+//  DRAG & DROP ENGINE (mouse drag + tap-to-place)
+// ══════════════════════════════════════════════════
+var DONE = {};
+document.querySelectorAll('[id^="bank"] .drag-chip').forEach(function(c){ c.setAttribute('data-home', c.parentNode.id); });
+function actOf(el) { return el && el.closest ? el.closest('.act') : null; }
+function dropTarget(el) {
+  if (el && el.nodeType !== 1) el = el.parentNode;
+  return el && el.closest ? el.closest('.drop-zone, .drag-bank') : null;
+}
+function placeChip(chip, tgt) {
+  if (!chip || !tgt || chip.classList.contains('locked')) return;
+  var act = actOf(tgt);
+  if (!act || actOf(chip) !== act || DONE[act.getAttribute('data-n')]) return;
+  if (tgt.classList.contains('drop-zone')) {
+    var d = tgt.querySelector('.drag-chip');
+    if (d === chip) return;
+    if (d) {
+      var from = chip.parentNode;
+      if (from.classList.contains('drop-zone')) from.appendChild(d);
+      else document.getElementById(d.getAttribute('data-home')).appendChild(d);
+    }
+    tgt.appendChild(chip);
+  } else if (tgt !== chip.parentNode) {
+    tgt.appendChild(chip);
+  }
+}
+var _drag = null;
+document.addEventListener('dragstart', function(e) {
+  var t = e.target;
+  if (t.classList && t.classList.contains('drag-chip') && !t.classList.contains('locked')) {
+    _drag = t; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', t.textContent);
+  }
+});
+document.addEventListener('dragover', function(e) { var t = dropTarget(e.target); if (t && _drag) { e.preventDefault(); t.classList.add('drag-over'); } });
+document.addEventListener('dragleave', function(e) { var t = dropTarget(e.target); if (t) t.classList.remove('drag-over'); });
+document.addEventListener('drop', function(e) {
+  e.preventDefault();
+  var t = dropTarget(e.target);
+  if (t) { t.classList.remove('drag-over'); placeChip(_drag, t); }
+  _drag = null;
+});
+document.addEventListener('dragend', function() {
+  _drag = null;
+  document.querySelectorAll('.drag-over').forEach(function(z){ z.classList.remove('drag-over'); });
+});
+var _pick = null;
+function unpick() { if (_pick) _pick.classList.remove('picked'); _pick = null; }
+document.addEventListener('click', function(e) {
+  var el = e.target; if (!el.closest) return;
+  var chip = el.closest('.drag-chip'), tgt = el.closest('.drop-zone, .drag-bank');
+  if (!_pick) { if (chip && !chip.classList.contains('locked')) { _pick = chip; chip.classList.add('picked'); } return; }
+  if (chip === _pick) { unpick(); return; }
+  if (chip && !chip.classList.contains('locked') && !chip.parentNode.classList.contains('drop-zone') && actOf(chip) === actOf(_pick)) {
+    unpick(); _pick = chip; chip.classList.add('picked'); return;
+  }
+  if (tgt) { placeChip(_pick, tgt); unpick(); return; }
+  unpick();
+});
+function getDZ(id) { var z = document.getElementById(id), c = z ? z.querySelector('.drag-chip') : null; return c ? c.textContent.trim() : ''; }
+function getSort(id) { var z = document.getElementById(id); return z ? Array.from(z.querySelectorAll('.drag-chip')).map(function(c){ return c.textContent.trim(); }) : []; }
+function lockAct(n) {
+  var act = document.querySelector('.act[data-n="' + n + '"]');
+  if (act) act.querySelectorAll('.drag-chip').forEach(function(c){ c.classList.add('locked'); c.setAttribute('draggable','false'); });
+}
+
+function checkSlots(n, ids, ans, okMsg, hints, emptyMsg) {
+  if (DONE[n]) return;
+  unpick();
+  var vals = ids.map(getDZ), res = document.getElementById('res' + n);
+  res.style.display = 'block';
+  if (vals.some(function(v){ return v === ''; })) { res.className = 'drag-result fb fb-bad'; res.innerHTML = '&#10007; ' + emptyMsg; return; }
+  var wrong = [];
+  vals.forEach(function(v, i){ if (v !== ans[i]) wrong.push(hints[i]); });
+  if (wrong.length === 0) {
+    DONE[n] = true; document.getElementById('btn' + n).disabled = true; lockAct(n);
+    res.className = 'drag-result fb fb-ok'; res.innerHTML = '&#10003; ' + okMsg;
+  } else {
+    res.className = 'drag-result fb fb-bad';
+    res.innerHTML = '&#10007; Not quite. ' + wrong.slice(0, 2).join(' ') + (wrong.length > 2 ? ' (' + (wrong.length - 2) + ' more to fix.)' : '');
+  }
+}
+function checkDrop5() {
+  checkSlots(5, ['dz5a','dz5b','dz5c','dz5d'],
+    ['Page 1','Page 3','Page 0','Page 2'],
+    'All correct! The page table says Page 0 &rarr; Frame 3, Page 1 &rarr; Frame 0, Page 2 &rarr; Frame 5 and Page 3 &rarr; Frame 1. The pages are scattered across RAM, but the page table lets the OS find each one.',
+    ['Frame 0: look for the page whose frame number is 0 — <strong>Page 1</strong>.',
+     'Frame 1: the page table maps <strong>Page 3</strong> to frame 1.',
+     'Frame 3: the page table maps <strong>Page 0</strong> to frame 3.',
+     'Frame 5: the page table maps <strong>Page 2</strong> to frame 5.'],
+    'Drag a page into every empty frame before checking.');
+}
+function checkDrop12() {
+  checkSlots(12, ['dz12a','dz12b','dz12c','dz12d','dz12e','dz12f'],
+    ['A process tries to use a page that is not in RAM','A page fault occurs and the OS takes over','A page not used recently is swapped out to disk','The needed page is loaded into the freed frame','The page table is updated','The process carries on from where it stopped'],
+    'All correct! Missing page &rarr; page fault &rarr; make space by swapping a page out &rarr; load the needed page &rarr; update the page table &rarr; carry on.',
+    ['Step 1: it all starts when a process asks for a page that is not in RAM.',
+     'Step 2: that causes a <strong>page fault</strong>, and the OS takes over.',
+     'Step 3: RAM is full, so space must be made first — a page is <strong>swapped out</strong>.',
+     'Step 4: the needed page can then be <strong>loaded</strong> into the freed frame.',
+     'Step 5: the OS records the new location by <strong>updating the page table</strong>.',
+     'Step 6: finally the process <strong>carries on</strong>.'],
+    'Drag a step into every row before checking.');
+}
+function checkDrop16() {
+  checkSlots(16, ['dz16a','dz16b','dz16c','dz16d','dz16e'],
+    ['Double','X = 10','Process','Price = 5, Qty = 2','Main'],
+    'All correct! Main called Process(5, 2), which worked out Cost = 10 and called Double(10). Double was called last, so its frame is on top, with X = 10.',
+    ['Top frame: the subroutine running right now is <strong>Double</strong> — the most recent call is on top.',
+     'Double was called with Cost, which is 5 &times; 2 = 10, so <strong>X = 10</strong>.',
+     'Middle frame: Double was called by <strong>Process</strong>.',
+     'Process was called with <strong>Price = 5, Qty = 2</strong>.',
+     'Bottom frame: the first subroutine called was <strong>Main</strong>.'],
+    'Drag a chip into every gap before checking.');
+}
+function checkDrop22() {
+  checkSlots(22, ['dz22a','dz22b','dz22c','dz22d','dz22e','dz22f','dz22g'],
+    ['pages','frames','segments','virtual memory','thrashing','stack frame','return address'],
+    'All correct — a great summary of memory management!',
+    ['Gap 1: a process is split into <strong>pages</strong>.',
+     'Gap 2: RAM is split into equal-size <strong>frames</strong>.',
+     'Gap 3: segmentation uses variable-size <strong>segments</strong>.',
+     'Gap 4: using the disk as extra RAM is <strong>virtual memory</strong>.',
+     'Gap 5: swapping pages too often causes <strong>thrashing</strong>.',
+     'Gap 6: each call pushes a <strong>stack frame</strong>.',
+     'Gap 7: the frame also stores the <strong>return address</strong>.'],
+    'Drag a word into every gap before checking.');
+}
+
+function checkCols(n, cols, names, total, okMsg, tip) {
+  if (DONE[n]) return;
+  unpick();
+  var res = document.getElementById('res' + n), count = 0, wrong = [];
+  res.style.display = 'block';
+  Object.keys(cols).forEach(function(zone) {
+    getSort(zone).forEach(function(v) {
+      count++;
+      if (cols[zone].indexOf(v) === -1) {
+        var home = Object.keys(cols).filter(function(z){ return cols[z].indexOf(v) !== -1; })[0];
+        wrong.push('“' + v + '” belongs in <strong>' + names[home] + '</strong>.');
+      }
+    });
+  });
+  if (count < total) { res.className = 'drag-result fb fb-bad'; res.innerHTML = '&#10007; Drag all ' + total + ' chips into a column before checking.'; return; }
+  if (wrong.length === 0) {
+    DONE[n] = true; document.getElementById('btn' + n).disabled = true; lockAct(n);
+    res.className = 'drag-result fb fb-ok'; res.innerHTML = '&#10003; ' + okMsg;
+  } else {
+    res.className = 'drag-result fb fb-bad'; res.innerHTML = '&#10007; ' + wrong.slice(0, 2).join(' ') + ' ' + tip;
+  }
+}
+function checkSort2() {
+  checkCols(2, {
+      'sort2-trk': ['Records which blocks are free and which are in use','Notes which process owns each block'],
+      'sort2-req': ['Works out how much memory a new process needs','Calculates space for code, data and stack'],
+      'sort2-ctl': ["Stops one process using another's memory","Frees a process's memory when it ends"]
+    },
+    { 'sort2-trk':'Tracking status', 'sort2-req':'Determining requirements', 'sort2-ctl':'Controlling usage' }, 6,
+    'All correct! Tracking = keeping the record; determining = working out how much is needed; controlling = allocating, freeing and protecting.',
+    'Tip: is the OS <em>recording</em>, <em>calculating</em> or <em>acting</em>?');
+}
+function checkSort10() {
+  checkCols(10, {
+      'sort10-pag': ['Blocks are all the same size','Can waste space inside the last block','Uses a table mapping pages to frames'],
+      'sort10-seg': ['Blocks match logical parts such as code, data and stack','Uses a table of base and limit values','Can leave unusable gaps between blocks']
+    },
+    { 'sort10-pag':'Paging', 'sort10-seg':'Segmentation' }, 6,
+    'All correct! Paging = equal blocks, page table, internal fragmentation. Segmentation = logical variable-size blocks, base and limit, external fragmentation.',
+    'Tip: equal size &rarr; paging; logical parts &rarr; segmentation.');
+}
+function checkSort18() {
+  checkCols(18, {
+      'sort18-in': ['Return address','Local variables','Parameters','Saved register values'],
+      'sort18-out': ['The page table','Global variables','The swap file']
+    },
+    { 'sort18-in':'Stored in a stack frame', 'sort18-out':'Not in a stack frame' }, 7,
+    'All correct! A stack frame holds the return address, parameters, local variables and saved registers. Global variables live outside the stack, the page table is kept by the OS, and the swap file is on disk.',
+    'Tip: a stack frame only holds things that belong to <em>one call</em> of a subroutine.');
+}
+</script>
+</body>
+</html>
